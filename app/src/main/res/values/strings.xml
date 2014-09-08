@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Fractals</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_picture">Picture</string>
+
+
+    <string name="ImageDrawer">ImageDrawer</string>
+
+    <string name="drawKoch">Снежинка Коха</string>
+    <string name="KochIterations">Iterations: </string>
+    <string name="stdKochNum">5</string>
+
+</resources>
