@@ -59,7 +59,7 @@
             android:text="@string/drawKoch"
             style="@style/stdText"
 
-            android:onClick="drawKoch"/>
+            android:onClick="computeKoch"/>
 
     </RelativeLayout>
 
@@ -106,7 +106,7 @@
         </RelativeLayout>
 
         <Button
-            android:id="@+id/btnDraw"
+            android:id="@+id/btnDrawMandel"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/rowMandel"
@@ -114,7 +114,7 @@
             android:text="@string/drawMandel"
             style="@style/stdText"
 
-            android:onClick="drawMandel"/>
+            android:onClick="computeMandel"/>
 
         </RelativeLayout>
 

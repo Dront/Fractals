@@ -26,8 +26,6 @@ public class PictureActivity extends Activity {
 
         getInterfaceResources();
 
-
-
         Intent i = getIntent();
         String type = i.getStringExtra("type");
 
