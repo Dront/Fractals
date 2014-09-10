@@ -42,7 +42,7 @@
                 android:layout_toRightOf="@id/txtViewKoch"
                 android:layout_toEndOf="@id/txtViewKoch"
 
-                android:gravity="center"
+                android:gravity="end"
                 android:inputType="numberDecimal"
                 style="@style/stdText"
                 android:text="@string/stdKochNum"/>
@@ -75,7 +75,7 @@
         android:paddingRight="@dimen/std_padding">
 
         <RelativeLayout
-            android:id="@+id/rowMandel"
+            android:id="@+id/rowMandel1"
             android:layout_width="fill_parent"
             android:layout_height="@dimen/std_row_height">
 
@@ -97,7 +97,7 @@
                 android:layout_toRightOf="@id/txtViewMandel"
                 android:layout_toEndOf="@id/txtViewMandel"
 
-                android:gravity="center"
+                android:gravity="end"
                 android:inputType="numberDecimal"
                 style="@style/stdText"
                 android:text="@string/stdMandelNum"/>
@@ -105,17 +105,66 @@
 
         </RelativeLayout>
 
+        <RelativeLayout
+            android:id="@+id/rowMandel2"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/std_row_height"
+            android:layout_below="@id/rowMandel1">
+
+            <TextView
+                android:id="@+id/txtViewMandelFormula"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+
+                style="@style/stdText"
+                android:gravity="start"
+                android:text="@string/MandelFormula" />
+
+            <Spinner
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/spinnerFormula"
+                android:layout_toRightOf="@id/txtViewMandelFormula"
+                android:layout_toEndOf="@id/txtViewMandelFormula"
+
+                android:gravity="end"
+                style="@style/stdText"
+                android:entries="@array/MandelFormulas"
+                android:spinnerMode="dialog"
+                android:textAlignment="viewEnd" />
+
+            <!--<EditText
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/edtTextMandelFormulaNum"
+                android:layout_toRightOf="@id/txtViewMandelFormula"
+                android:layout_toEndOf="@id/txtViewMandelFormula"
+
+                android:gravity="end"
+                android:inputType="numberDecimal"
+                style="@style/stdText"
+                android:text="@string/stdMandelFormulaNum"/>-->
+
+
+        </RelativeLayout>
+
+
+
         <Button
             android:id="@+id/btnDrawMandel"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/rowMandel"
+            android:layout_below="@id/rowMandel2"
 
             android:text="@string/drawMandel"
             style="@style/stdText"
 
             android:onClick="computeMandel"/>
 
-        </RelativeLayout>
+    </RelativeLayout>
+
+
 
 </RelativeLayout>

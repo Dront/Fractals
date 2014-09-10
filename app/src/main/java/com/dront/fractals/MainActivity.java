@@ -6,12 +6,17 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+
+import Util.Complex;
 
 
 public class MainActivity extends Activity {
@@ -26,6 +31,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        customizeSpinner();
     }
 
     @Override
@@ -36,6 +43,18 @@ public class MainActivity extends Activity {
         colors = null;
 
         interfaceControl(true);
+    }
+
+    private void customizeSpinner(){
+        Spinner spinner = (Spinner) findViewById(R.id.spinnerFormula);
+        int size = spinner.getChildCount();
+
+        TextView tmp;
+        for (int i = 0; i < size; i++){
+            tmp = (TextView)spinner.getChildAt(i);
+            tmp.setTextSize(25);
+            tmp.setGravity(Gravity.END);
+        }
     }
 
     private void interfaceControl(boolean state){
@@ -75,9 +94,13 @@ public class MainActivity extends Activity {
             return;
         }
 
+        Spinner spinner = (Spinner) findViewById(R.id.spinnerFormula);
+        long formulaNum = spinner.getSelectedItemId();
+        Log.d("spinner", "formula num: " + formulaNum);
+
         interfaceControl(false);
 
-        MandelbrotComputer Mandel = new MandelbrotComputer();
+        MandelbrotComputer Mandel = new MandelbrotComputer((int)formulaNum + 1);
         Mandel.execute(iterMandel);
     }
 
@@ -147,7 +170,12 @@ public class MainActivity extends Activity {
 
     private class MandelbrotComputer extends AsyncTask<Integer, Void, Void>{
 
-        long startTime;
+        private int power;
+        private long startTime;
+
+        public MandelbrotComputer(int formulaNum){
+            power = formulaNum;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -166,16 +194,20 @@ public class MainActivity extends Activity {
             colors = new int[width * height];
 
             double Ax, Bx, Ay, By;
-            Ax = 2.5 / width; Bx = -2;
-            Ay = 2.0 / height; By = -1;
+            Ax = 4.0 / width; Bx = -2.0;
+            Ay = 3.0 / height; By = -1.5;
 
+            Complex z = new Complex();
+            Complex tmp = new Complex();
             for (int x0 = 0; x0 < width; x0++)
             {
-                double x = Ax * x0 + Bx;
+                z.setRe(Ax * x0 + Bx);
                 for (int y0 = 0; y0 < height; y0++)
                 {
-                    double y = Ay * y0 + By;
-                    long iter = computeDepth(x, y, iterMandel);
+                    z.setIm(Ay * y0 + By);
+                    tmp.setRe(0);
+                    tmp.setIm(0);
+                    long iter = computeDepth(z, tmp, iterMandel);
                     int color = Color.rgb((int)(256 - iter*4 % 256), (int)(256 - iter * 6 % 256), (int)(256 - iter * 20 % 256));
                     colors[x0 * height + y0] = color;
                 }
@@ -195,18 +227,51 @@ public class MainActivity extends Activity {
             startActivity(i);
         }
 
-        private int computeDepth(double X, double Y, int maxIterations)
+        private int computeDepth(Complex z, Complex tmp, int maxIterations)
         {
             int res = 0;
-            double a = 0, b = 0;
-            while ((a * a + b * b < 4) && (res < maxIterations))
+            while ((tmp.lightAbs() < 4) && (res < maxIterations))
             {
-                double tmp = a * a - b * b + X;
-                b = 2 * a * b + Y;
-                a = tmp;
+                switch(power){
+                    case 1:
+                        tmp.lightPlus(z);
+                        break;
+                    case 2:
+                        tmp.lightTimes(tmp);
+                        tmp.lightPlus(z);
+                        break;
+                    case 3:
+                        tmp.lightTimes(tmp);
+                        tmp.lightTimes(tmp);
+                        tmp.lightPlus(z);
+                        break;
+                    case 4:
+                        tmp.lightTimes(tmp);
+                        tmp.lightTimes(tmp);
+                        tmp.lightTimes(tmp);
+                        tmp.lightPlus(z);
+                        break;
+                    case 5:
+                        tmp.lightTimes(tmp);
+                        tmp.lightTimes(tmp);
+                        tmp.lightTimes(tmp);
+                        tmp.lightTimes(tmp);
+                        tmp.lightPlus(z);
+                        break;
+                    case 6:
+                        tmp.lightSin();
+                        tmp.lightPlus(z);
+                        break;
+                    case 7:
+                        tmp.lightExp();
+                        tmp.lightPlus(z);
+                        break;
+                }
                 res++;
             }
             return res;
         }
+
+
     }
 }

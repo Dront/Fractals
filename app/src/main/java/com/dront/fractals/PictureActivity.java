@@ -34,6 +34,7 @@ public class PictureActivity extends Activity {
         } else if (type.equals("Mandel")){
             drawMandel(MainActivity.colors);
         }
+
     }
 
     @Override

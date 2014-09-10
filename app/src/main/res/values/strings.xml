@@ -16,5 +16,17 @@
     <string name="drawMandel">Множество Мандельброта</string>
     <string name="MandelIterations">Iterations: </string>
     <string name="stdMandelNum">50</string>
+    <string name="MandelFormula">Formula: </string>
+    <string name="stdMandelFormulaNum">2</string>
+
+    <string-array name="MandelFormulas">
+        <item>z + c</item>
+        <item>z^2 + c</item>
+        <item>z^4 + c</item>
+        <item>z^8 + c</item>
+        <item>z^16 + c</item>
+        <item>sin(z) + c</item>
+        <item>exp(z) + c</item>
+    </string-array>
 
 </resources>
