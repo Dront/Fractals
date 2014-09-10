@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.widget.ImageView;
 
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 
 public class PictureActivity extends Activity {
 
-    private static final int SIZE = 512;
+    private static final int SIZE = 1000;
 
     ImageView imgViewMain;
     Bitmap pic;
@@ -27,13 +26,15 @@ public class PictureActivity extends Activity {
 
         getInterfaceResources();
 
-        pic = Bitmap.createBitmap(SIZE, SIZE, Bitmap.Config.ARGB_8888);
+
 
         Intent i = getIntent();
         String type = i.getStringExtra("type");
 
         if (type.equals("Koch")){
             drawKoch(MainActivity.segments);
+        } else if (type.equals("Mandel")){
+            drawMandel(MainActivity.colors);
         }
     }
 
@@ -44,8 +45,6 @@ public class PictureActivity extends Activity {
         if (pic != null){
             pic.recycle();
         }
-
-        MainActivity.segments.clear();
     }
 
     private void getInterfaceResources(){
@@ -54,10 +53,11 @@ public class PictureActivity extends Activity {
 
     private void drawKoch(ArrayList<Segment> data){
 
+        pic = Bitmap.createBitmap(SIZE, SIZE, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(pic);
 
         Paint paint = new Paint();
-        paint.setColor(Color.BLACK);
+        paint.setColor(Color.BLUE);
         paint.setAntiAlias(true);
         paint.setStrokeWidth(3.0f);
         paint.setStyle(Paint.Style.STROKE);
@@ -65,6 +65,16 @@ public class PictureActivity extends Activity {
         for (Segment seg: data){
             canvas.drawLine(SIZE * (float)seg.getX1(), SIZE * (float)seg.getY1(),
                     SIZE * (float)seg.getX2(), SIZE * (float)seg.getY2(), paint);
+        }
+        imgViewMain.setImageBitmap(pic);
+    }
+
+    private void drawMandel(int[] data){
+        pic = Bitmap.createBitmap(Constants.WIDTH, Constants.HEIGHT, Bitmap.Config.ARGB_8888);
+        for (int x = 0; x < Constants.WIDTH; x++){
+            for (int y = 0; y < Constants.HEIGHT; y++){
+                pic.setPixel(x, y, data[x * Constants.HEIGHT + y]);
+            }
         }
         imgViewMain.setImageBitmap(pic);
     }

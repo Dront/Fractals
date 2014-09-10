@@ -13,4 +13,8 @@
     <string name="KochIterations">Iterations: </string>
     <string name="stdKochNum">5</string>
 
+    <string name="drawMandel">Множество Мандельброта</string>
+    <string name="MandelIterations">Iterations: </string>
+    <string name="stdMandelNum">50</string>
+
 </resources>

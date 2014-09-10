@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="std_text">#3B096E</color>
+    <color name="test_color">#FFFFFF</color>
+    <color name="std_background">#99FF33</color>
+
+</resources>

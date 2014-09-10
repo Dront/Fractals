@@ -2,18 +2,12 @@ package com.dront.fractals;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -21,9 +15,13 @@ import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
-    private EditText edtKochIterations;
+    private static final int MAX_ITER_KOCH = 7;
+    private static final int MAX_ITER_MANDEL = 500;
+
+    private EditText edtKochIterations, edtMandelIterations;
 
     public static ArrayList<Segment> segments;
+    public static int[] colors;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,24 +29,43 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         getInterfaceResources();
+    }
 
-        segments = new ArrayList<Segment>();
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (segments != null){
+            segments.clear();
+        }
+
+        if (colors != null){
+            colors = new int[1];
+        }
     }
 
     private void getInterfaceResources(){
         edtKochIterations = (EditText) findViewById(R.id.edtTextKochNum);
+        edtMandelIterations = (EditText) findViewById(R.id.edtTextMandelNum);
     }
 
-    public void DrawKoch(View v){
+    private class ComputeKoch extends AsyncTask<Integer, Void, Void>{
+        @Override
+        protected Void doInBackground(Integer... integers) {
+            return null;
+        }
+    }
+
+    public void drawKoch(View v){
         int iterKoch = Integer.parseInt(edtKochIterations.getText().toString());
-        if (iterKoch > 7){
-            String msg = "Max number of iterations = 7";
+        if (iterKoch > MAX_ITER_KOCH){
+            String msg = "Max number of iterations = " + MAX_ITER_KOCH;
             Log.d(LogTags.APP, msg);
             Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        segments.clear();
+        segments = new ArrayList<Segment>();
         final double sqrt36 = Math.sqrt(3.0) / 6;
 
         Point startPoint1 = new Point(0, sqrt36);
@@ -87,4 +104,59 @@ public class MainActivity extends Activity {
         startActivity(i);
     }
 
+    public void drawMandel(View v){
+        int iterMandel = Integer.parseInt(edtMandelIterations.getText().toString());
+        if (iterMandel > MAX_ITER_MANDEL){
+            String msg = "Max number of iterations = " + MAX_ITER_MANDEL;
+            Log.d(LogTags.APP, msg);
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final int width = Constants.WIDTH;
+        final int height = Constants.HEIGHT;
+
+        final long time1 = System.currentTimeMillis();
+
+        colors = new int[width * height];
+
+        double Ax, Bx, Ay, By;
+        Ax = 2.5 / width; Bx = -2;
+        Ay = 2.0 / height; By = -1;
+
+        for (int x0 = 0; x0 < width; x0++)
+        {
+            double x = Ax * x0 + Bx;
+            for (int y0 = 0; y0 < height; y0++)
+            {
+                double y = Ay * y0 + By;
+                long iter = mandelbrotIteration(x, y, iterMandel);
+                int color = Color.rgb((int)(256 - iter*4 % 256), (int)(256 - iter * 6 % 256), (int)(256 - iter * 20 % 256));
+                colors[x0 * height + y0] = color;
+            }
+        }
+
+        final long time2 = System.currentTimeMillis();
+        String msg = "Time used: " + (time2 - time1) + " ms.";
+        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+
+        Intent i = new Intent(getApplicationContext(), PictureActivity.class);
+        i.putExtra("type", "Mandel");
+        startActivity(i);
+
+    }
+
+    private int mandelbrotIteration(double X, double Y, int maxIterations)
+    {
+        int res = 0;
+        double a = 0, b = 0;
+        while ((a * a + b * b < 4) && (res < maxIterations))
+        {
+            double tmp = a * a - b * b + X;
+            b = 2 * a * b + Y;
+            a = tmp;
+            res++;
+        }
+        return res;
+    }
 }

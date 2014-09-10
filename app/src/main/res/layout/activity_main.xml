@@ -13,7 +13,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="@dimen/std_margin"
+        android:background="@color/std_background"
+        android:paddingLeft="@dimen/std_padding"
+        android:paddingRight="@dimen/std_padding">
 
         <RelativeLayout
             android:id="@+id/rowKoch"
@@ -47,7 +51,7 @@
         </RelativeLayout>
 
         <Button
-            android:id="@+id/btnDraw"
+            android:id="@+id/btnDrawKoch"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/rowKoch"
@@ -55,8 +59,63 @@
             android:text="@string/drawKoch"
             style="@style/stdText"
 
-            android:onClick="DrawKoch"/>
+            android:onClick="drawKoch"/>
 
     </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/MandelbrotLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/KochLayout"
+        android:layout_marginTop="@dimen/std_margin"
+        android:layout_marginBottom="@dimen/std_margin"
+        android:background="@color/std_background"
+        android:paddingLeft="@dimen/std_padding"
+        android:paddingRight="@dimen/std_padding">
+
+        <RelativeLayout
+            android:id="@+id/rowMandel"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/std_row_height">
+
+            <TextView
+                android:id="@+id/txtViewMandel"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+
+                style="@style/stdText"
+                android:gravity="start"
+                android:text="@string/MandelIterations" />
+
+            <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/edtTextMandelNum"
+                android:layout_toRightOf="@id/txtViewMandel"
+                android:layout_toEndOf="@id/txtViewMandel"
+
+                android:gravity="center"
+                android:inputType="numberDecimal"
+                style="@style/stdText"
+                android:text="@string/stdMandelNum"/>
+
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/btnDraw"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/rowMandel"
+
+            android:text="@string/drawMandel"
+            style="@style/stdText"
+
+            android:onClick="drawMandel"/>
+
+        </RelativeLayout>
 
 </RelativeLayout>
