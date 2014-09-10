@@ -2,7 +2,7 @@ package com.dront.fractals;
 
 public class Constants {
 
-    public final static int WIDTH = 1280;
-    public final static int HEIGHT = 960;
+    public final static int WIDTH = 640;
+    public final static int HEIGHT = 480;
 
 }

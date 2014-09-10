@@ -194,8 +194,8 @@ public class MainActivity extends Activity {
             colors = new int[width * height];
 
             double Ax, Bx, Ay, By;
-            Ax = 4.0 / width; Bx = -2.0;
-            Ay = 3.0 / height; By = -1.5;
+            Ax = 2.5 / width; Bx = -1.5;
+            Ay = 2.2 / height; By = -1.1;
 
             Complex z = new Complex();
             Complex tmp = new Complex();
