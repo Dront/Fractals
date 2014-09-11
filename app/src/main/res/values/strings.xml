@@ -17,8 +17,6 @@
     <string name="MandelIterations">Iterations: </string>
     <string name="stdMandelNum">50</string>
     <string name="MandelFormula">Formula: </string>
-    <string name="stdMandelFormulaNum">2</string>
-
     <string-array name="MandelFormulas">
         <item>z + c</item>
         <item>z^2 + c</item>
@@ -29,4 +27,8 @@
         <item>exp(z) + c</item>
     </string-array>
 
+
+    <string name="drawTriangle">Треугольник Серпинского</string>
+    <string name="TriangleIterations">Iterations: </string>
+    <string name="stdTriangleNum">10000</string>
 </resources>

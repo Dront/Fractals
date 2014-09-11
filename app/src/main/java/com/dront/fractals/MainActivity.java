@@ -23,9 +23,11 @@ public class MainActivity extends Activity {
 
     private static final int MAX_ITER_KOCH = 10;
     private static final int MAX_ITER_MANDEL = 500;
+    private static final int MAX_ITER_TRIANGLE = 1000000;
 
     public static ArrayList<Segment> segments;
     public static int[] colors;
+    public static Point[] points;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,7 @@ public class MainActivity extends Activity {
 
         segments = null;
         colors = null;
+        points = null;
 
         interfaceControl(true);
     }
@@ -60,9 +63,11 @@ public class MainActivity extends Activity {
     private void interfaceControl(boolean state){
         Button btnKoch = (Button) findViewById(R.id.btnDrawKoch);
         Button btnMandel = (Button) findViewById(R.id.btnDrawMandel);
+        Button btnTriangle = (Button) findViewById(R.id.btnDrawTriangle);
 
         btnKoch.setEnabled(state);
         btnMandel.setEnabled(state);
+        btnTriangle.setEnabled(state);
     }
 
     public void computeKoch(View v){
@@ -104,12 +109,30 @@ public class MainActivity extends Activity {
         Mandel.execute(iterMandel);
     }
 
+    public void computeTriangle(View v){
+        EditText edtTriangleIterations = (EditText) findViewById(R.id.edtTextTriangleNum);
+        int iterTriangle = Integer.parseInt(edtTriangleIterations.getText().toString());
+
+        if (iterTriangle > MAX_ITER_TRIANGLE){
+            String msg = "Max number of iterations = " + MAX_ITER_TRIANGLE;
+            Log.d(LogTags.APP, msg);
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        interfaceControl(false);
+
+        TriangleComputer Sierpinski = new TriangleComputer();
+        Sierpinski.execute(iterTriangle);
+    }
+
     private class KochComputer extends AsyncTask<Integer, Void, Void>{
 
         long startTime;
 
         @Override
         protected void onPreExecute() {
+            super.onPreExecute();
             startTime = System.currentTimeMillis();
             String msg = "Started computing Koch snowflake";
             Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
@@ -273,5 +296,54 @@ public class MainActivity extends Activity {
         }
 
 
+    }
+
+    private class TriangleComputer extends AsyncTask<Integer, Void, Void>{
+
+        long startTime;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            startTime = System.currentTimeMillis();
+            String msg = "Started computing Sierpinski triangle";
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        protected Void doInBackground(Integer... integers) {
+            final int iterTriangle = integers[0];
+
+            Point vertex1 = new Point(0, 0);
+            Point vertex2 = new Point(1, 0);
+            Point vertex3 = new Point(0.5, Math.sqrt(3.0) / 2);
+            Point point = new Point(0.49, 0.51);
+
+            points = new Point[iterTriangle];
+            for (int i = 0; i < iterTriangle; i++){
+                double rand = Math.random();
+                if (rand < 1.0 / 3){
+                    point = new Point((point.x + vertex1.x) / 2, (point.y + vertex1.y) / 2);
+                } else if (rand > 1.0 / 3 && rand > 2.0 / 3){
+                    point = new Point((point.x + vertex2.x) / 2, (point.y + vertex2.y) / 2);
+                } else {
+                    point = new Point((point.x + vertex3.x) / 2, (point.y + vertex3.y) / 2);
+                }
+                points[i] = point;
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            long finishTime = System.currentTimeMillis();
+            String msg = "Computing finished in " + (finishTime - startTime) + "ms";
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+
+            Intent i = new Intent(getApplicationContext(), PictureActivity.class);
+            i.putExtra("type", "Triangle");
+            startActivity(i);
+        }
     }
 }

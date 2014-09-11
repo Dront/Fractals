@@ -33,8 +33,9 @@ public class PictureActivity extends Activity {
             drawKoch(MainActivity.segments);
         } else if (type.equals("Mandel")){
             drawMandel(MainActivity.colors);
+        } else if (type.equals("Triangle")){
+            drawTriangle(MainActivity.points);
         }
-
     }
 
     @Override
@@ -74,6 +75,22 @@ public class PictureActivity extends Activity {
             for (int y = 0; y < Constants.HEIGHT; y++){
                 pic.setPixel(x, y, data[x * Constants.HEIGHT + y]);
             }
+        }
+        imgViewMain.setImageBitmap(pic);
+    }
+
+    private void drawTriangle(Point[] data){
+        pic = Bitmap.createBitmap(SIZE, SIZE, Bitmap.Config.ARGB_8888);
+
+        int counter = 0;
+        for (Point tmp: data){
+
+            if (tmp.x > 1 || tmp.y > 1){
+                continue;
+            }
+            int x = (int)(tmp.x * SIZE);
+            int y = (int)(tmp.y * SIZE);
+            pic.setPixel(x, y, Color.RED);
         }
         imgViewMain.setImageBitmap(pic);
     }

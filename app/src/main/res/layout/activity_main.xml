@@ -132,25 +132,9 @@
                 android:gravity="end"
                 style="@style/stdText"
                 android:entries="@array/MandelFormulas"
-                android:spinnerMode="dialog"
-                android:textAlignment="viewEnd" />
-
-            <!--<EditText
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:id="@+id/edtTextMandelFormulaNum"
-                android:layout_toRightOf="@id/txtViewMandelFormula"
-                android:layout_toEndOf="@id/txtViewMandelFormula"
-
-                android:gravity="end"
-                android:inputType="numberDecimal"
-                style="@style/stdText"
-                android:text="@string/stdMandelFormulaNum"/>-->
-
+                android:spinnerMode="dialog" />
 
         </RelativeLayout>
-
-
 
         <Button
             android:id="@+id/btnDrawMandel"
@@ -165,6 +149,60 @@
 
     </RelativeLayout>
 
+    <RelativeLayout
+        android:id="@+id/TriangleLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/MandelbrotLayout"
+        android:layout_marginTop="@dimen/std_margin"
+        android:layout_marginBottom="@dimen/std_margin"
+        android:background="@color/std_background"
+        android:paddingLeft="@dimen/std_padding"
+        android:paddingRight="@dimen/std_padding">
+
+        <RelativeLayout
+            android:id="@+id/rowTriangle"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/std_row_height">
+
+            <TextView
+                android:id="@+id/txtViewTriangle"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+
+                style="@style/stdText"
+                android:gravity="start"
+                android:text="@string/TriangleIterations" />
+
+            <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/edtTextTriangleNum"
+                android:layout_toRightOf="@id/txtViewTriangle"
+                android:layout_toEndOf="@id/txtViewTriangle"
+
+                android:gravity="end"
+                android:inputType="numberDecimal"
+                style="@style/stdText"
+                android:text="@string/stdTriangleNum"/>
+
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/btnDrawTriangle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/rowTriangle"
+
+            android:text="@string/drawTriangle"
+            style="@style/stdText"
+
+            android:onClick="computeTriangle"/>
+
+    </RelativeLayout>
 
 
 </RelativeLayout>
