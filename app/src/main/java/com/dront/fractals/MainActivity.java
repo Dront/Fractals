@@ -14,6 +14,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import Util.Complex;
@@ -21,7 +22,7 @@ import Util.Complex;
 
 public class MainActivity extends Activity {
 
-    private static final int MAX_ITER_KOCH = 10;
+    private static final int MAX_ITER_KOCH = 9;
     private static final int MAX_ITER_MANDEL = 500;
     private static final int MAX_ITER_TRIANGLE = 1000000;
 
@@ -109,7 +110,7 @@ public class MainActivity extends Activity {
         Mandel.execute(iterMandel);
     }
 
-    public void computeTriangle(View v){
+    public void computeSierpinski(View v){
         EditText edtTriangleIterations = (EditText) findViewById(R.id.edtTextTriangleNum);
         int iterTriangle = Integer.parseInt(edtTriangleIterations.getText().toString());
 
@@ -122,8 +123,30 @@ public class MainActivity extends Activity {
 
         interfaceControl(false);
 
-        TriangleComputer Sierpinski = new TriangleComputer();
-        Sierpinski.execute(iterTriangle);
+//        final int N = 3;
+//        final double[][] attractors = new double[][]{
+//            {0.5, 0.0, 0.0, 0.5, 0.0, 0.0, 1.0 / 3},
+//            {0.5, 0.0, 0.0, 0.5, 0.5, 0.0, 1.0 / 3},
+//            {0.5, 0.0, 0.0, 0.5, 0.25, Math.sqrt(3.0) / 2 / 2, 1.0 / 3}
+//        };
+
+//        final int N = 2;
+//        final double[][] attractors = new double[][]{
+//                {0.5, 0.5, -0.5,  0.5,  0.0, 0.5, 0.5},
+//                {0.5, 0.5,  0.5, -0.5,  0.5, 1.0, 0.5}
+//        };
+
+        final int N = 2;
+        final double[][] attractors = new double[][]{
+                {-0.61, 0.7, -0.7, -0.61, 0.00, 0.0, 0.9},
+                {0.21, 0.0,  0.0,  0.21, 0.79, 0.0, 0.1}
+        };
+
+        IFSComputer IFS = new IFSComputer(attractors, N);
+        IFS.execute(iterTriangle);
+
+        //SierpinskiComputer Sierpinski = new SierpinskiComputer(3);
+        //Sierpinski.execute(iterTriangle);
     }
 
     private class KochComputer extends AsyncTask<Integer, Void, Void>{
@@ -298,9 +321,22 @@ public class MainActivity extends Activity {
 
     }
 
-    private class TriangleComputer extends AsyncTask<Integer, Void, Void>{
+    public class SierpinskiComputer extends AsyncTask<Integer, Void, Void>{
 
-        long startTime;
+        private final Point vertex31 = new Point(0, 0);
+        private final Point vertex32 = new Point(1, 0);
+        private final Point vertex33 = new Point(0.5, Math.sqrt(3.0) / 2);
+        private final Point vertex41 = new Point(0, 0);
+        private final Point vertex42 = new Point(1, 0);
+        private final Point vertex43 = new Point(1, 1);
+        private final Point vertex44 = new Point(0, 1);
+
+        private int numberOfVertexes;
+        private long startTime;
+
+        public SierpinskiComputer(int number){
+            numberOfVertexes = number;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -313,21 +349,19 @@ public class MainActivity extends Activity {
         @Override
         protected Void doInBackground(Integer... integers) {
             final int iterTriangle = integers[0];
-
-            Point vertex1 = new Point(0, 0);
-            Point vertex2 = new Point(1, 0);
-            Point vertex3 = new Point(0.5, Math.sqrt(3.0) / 2);
-            Point point = new Point(0.49, 0.51);
+            Point point = new Point(0.5, 0.5);
 
             points = new Point[iterTriangle];
             for (int i = 0; i < iterTriangle; i++){
-                double rand = Math.random();
-                if (rand < 1.0 / 3){
-                    point = new Point((point.x + vertex1.x) / 2, (point.y + vertex1.y) / 2);
-                } else if (rand > 1.0 / 3 && rand > 2.0 / 3){
-                    point = new Point((point.x + vertex2.x) / 2, (point.y + vertex2.y) / 2);
-                } else {
-                    point = new Point((point.x + vertex3.x) / 2, (point.y + vertex3.y) / 2);
+                switch (numberOfVertexes) {
+                    case 3:
+                        point = triangle(point);
+                        break;
+                    case 4:
+                        point = carpet(point);
+                        break;
+                    default:
+                        Log.d(LogTags.APP, "Wrong number of vertexes");
                 }
                 points[i] = point;
             }
@@ -345,5 +379,111 @@ public class MainActivity extends Activity {
             i.putExtra("type", "Triangle");
             startActivity(i);
         }
+
+        private Point triangle(Point point){
+            double rand = Math.random();
+            if (rand < 1.0 / 3){
+                return new Point((point.x + vertex31.x) / 2, (point.y + vertex31.y) / 2);
+            } else if (rand > 1.0 / 3 && rand > 2.0 / 3){
+                return new Point((point.x + vertex32.x) / 2, (point.y + vertex32.y) / 2);
+            } else {
+                return new Point((point.x + vertex33.x) / 2, (point.y + vertex33.y) / 2);
+            }
+        }
+
+        private Point carpet(Point point) {
+            double rand = Math.random();
+            if (rand < 1.0 / 4) {
+                return new Point((point.x + vertex41.x) / 2, (point.y + vertex41.y) / 2);
+            } else if (rand > 1.0 / 4 && rand < 2.0 / 4) {
+                return new Point((point.x + vertex42.x) / 2, (point.y + vertex42.y) / 2);
+            } else if (rand > 2.0 / 4 && rand < 3.0 / 4) {
+                return new Point((point.x + vertex43.x) / 2, (point.y + vertex43.y) / 2);
+            } else {
+                return new Point((point.x + vertex44.x) / 2, (point.y + vertex44.y) / 2);
+            }
+        }
+    }
+
+    public class IFSComputer extends AsyncTask<Integer, Void, Void>{
+
+        public static final int ROW_SIZE = 7;
+
+        private long startTime;
+        final int N;
+        final double [][] IFSData;
+
+        public IFSComputer(double[][] attractors, int N){
+            this.N = N;
+            IFSData = attractors;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            startTime = System.currentTimeMillis();
+            String msg = "Started computing IFS";
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        protected Void doInBackground(Integer... integers) {
+            final int IFSIterations = integers[0];
+            Point point = new Point(0.5, 0.5);
+
+            points = new Point[IFSIterations];
+            for (int i = 0; i < IFSIterations; i++) {
+                int num = getFunctionNumber();
+                double a = IFSData[num][0];
+                double b = IFSData[num][1];
+                double c = IFSData[num][2];
+                double d = IFSData[num][3];
+                double e = IFSData[num][4];
+                double f = IFSData[num][5];
+                double newX = a * point.x + b * point.y + e;
+                double newY = c * point.x + d * point.y + f;
+                point = new Point(newX, newY);
+                points[i] = point;
+            }
+
+            return null;
+        }
+
+        private int getFunctionNumber(){
+            double rand = Math.random();
+            double lowBorder = 0;
+            double highBorder = 0;
+            for (int i = 0; i < N; i++){
+                lowBorder = countProbSum(i);
+                highBorder = countProbSum(i + 1);
+                if (rand > lowBorder && rand < highBorder){
+                    return i;
+                }
+            }
+            DecimalFormat df = new DecimalFormat("#.##");
+            Log.d(LogTags.APP, "Wrong func number: " + df.format(lowBorder) + " " + df.format(highBorder) + " " + df.format(rand));
+            return (int) (rand * N);
+        }
+
+        private double countProbSum(int num){
+            double sum = 0;
+            for (int i = 0; i < num; i++){
+                sum += IFSData[i][ROW_SIZE - 1];
+            }
+            return sum;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            long finishTime = System.currentTimeMillis();
+            String msg = "Computing finished in " + (finishTime - startTime) + "ms";
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+
+            Intent i = new Intent(getApplicationContext(), PictureActivity.class);
+            i.putExtra("type", "IFS");
+            startActivity(i);
+        }
+
     }
 }

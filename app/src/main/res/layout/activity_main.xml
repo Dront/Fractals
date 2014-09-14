@@ -200,7 +200,7 @@
             android:text="@string/drawTriangle"
             style="@style/stdText"
 
-            android:onClick="computeTriangle"/>
+            android:onClick="computeSierpinski"/>
 
     </RelativeLayout>
 

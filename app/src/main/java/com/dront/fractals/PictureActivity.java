@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ public class PictureActivity extends Activity {
         } else if (type.equals("Mandel")){
             drawMandel(MainActivity.colors);
         } else if (type.equals("Triangle")){
+            drawTriangle(MainActivity.points);
+        } else if (type.equals("IFS")) {
             drawTriangle(MainActivity.points);
         }
     }
@@ -82,16 +85,17 @@ public class PictureActivity extends Activity {
     private void drawTriangle(Point[] data){
         pic = Bitmap.createBitmap(SIZE, SIZE, Bitmap.Config.ARGB_8888);
 
-        int counter = 0;
         for (Point tmp: data){
-
-            if (tmp.x > 1 || tmp.y > 1){
+            if (tmp.x >= 1 || tmp.y >= 1 || tmp.x < 0 || tmp.y < 0){
+                Log.d(LogTags.APP, "point with wrong coords in MainActivity.points");
                 continue;
             }
+
             int x = (int)(tmp.x * SIZE);
             int y = (int)(tmp.y * SIZE);
             pic.setPixel(x, y, Color.RED);
         }
+
         imgViewMain.setImageBitmap(pic);
     }
 }
