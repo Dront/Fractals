@@ -28,17 +28,23 @@ public class PictureActivity extends Activity {
         getInterfaceResources();
 
         Intent i = getIntent();
-        String type = i.getStringExtra("type");
+        final String type = i.getStringExtra("type");
 
-        if (type.equals("Koch")){
-            drawKoch(MainActivity.segments);
-        } else if (type.equals("Mandel")){
-            drawMandel(MainActivity.colors);
-        } else if (type.equals("Triangle")){
-            drawTriangle(MainActivity.points);
-        } else if (type.equals("IFS")) {
-            drawTriangle(MainActivity.points);
-        }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (type.equals("Koch")){
+                    drawKoch(MainActivity.segments);
+                } else if (type.equals("Mandel")){
+                    drawMandel(MainActivity.colors);
+                } else if (type.equals("Julia")){
+                    drawMandel(MainActivity.colors);
+                } else if (type.equals("IFS")) {
+                    drawTriangle(MainActivity.points);
+                }
+            }
+        }).start();
     }
 
     @Override
@@ -69,7 +75,12 @@ public class PictureActivity extends Activity {
             canvas.drawLine(SIZE * (float)seg.getX1(), SIZE * (float)seg.getY1(),
                     SIZE * (float)seg.getX2(), SIZE * (float)seg.getY2(), paint);
         }
-        imgViewMain.setImageBitmap(pic);
+        imgViewMain.post(new Runnable() {
+            @Override
+            public void run() {
+                imgViewMain.setImageBitmap(pic);
+            }
+        });
     }
 
     private void drawMandel(int[] data){
@@ -79,7 +90,12 @@ public class PictureActivity extends Activity {
                 pic.setPixel(x, y, data[x * Constants.HEIGHT + y]);
             }
         }
-        imgViewMain.setImageBitmap(pic);
+        imgViewMain.post(new Runnable() {
+            @Override
+            public void run() {
+                imgViewMain.setImageBitmap(pic);
+            }
+        });
     }
 
     private void drawTriangle(Point[] data){
@@ -96,6 +112,11 @@ public class PictureActivity extends Activity {
             pic.setPixel(x, y, Color.RED);
         }
 
-        imgViewMain.setImageBitmap(pic);
+        imgViewMain.post(new Runnable() {
+            @Override
+            public void run() {
+                imgViewMain.setImageBitmap(pic);
+            }
+        });
     }
 }

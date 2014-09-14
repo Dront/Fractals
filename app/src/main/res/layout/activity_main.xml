@@ -125,7 +125,7 @@
             <Spinner
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:id="@+id/spinnerFormula"
+                android:id="@+id/spinnerFormulaMandel"
                 android:layout_toRightOf="@id/txtViewMandelFormula"
                 android:layout_toEndOf="@id/txtViewMandelFormula"
 
@@ -150,10 +150,96 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/IFSLayout"
+        android:id="@+id/JuliaLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/MandelbrotLayout"
+        android:layout_marginTop="@dimen/std_margin"
+        android:layout_marginBottom="@dimen/std_margin"
+        android:background="@color/std_background"
+        android:paddingLeft="@dimen/std_padding"
+        android:paddingRight="@dimen/std_padding">
+
+        <RelativeLayout
+            android:id="@+id/rowJulia1"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/std_row_height">
+
+            <TextView
+                android:id="@+id/txtViewJulia"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+
+                style="@style/stdText"
+                android:gravity="start"
+                android:text="@string/JuliaIterations" />
+
+            <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/edtTextJuliaNum"
+                android:layout_toRightOf="@id/txtViewJulia"
+                android:layout_toEndOf="@id/txtViewJulia"
+
+                android:gravity="end"
+                android:inputType="numberDecimal"
+                style="@style/stdText"
+                android:text="@string/stdJuliaNum"/>
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rowJulia2"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/std_row_height"
+            android:layout_below="@id/rowJulia1">
+
+            <TextView
+                android:id="@+id/txtViewJuliaFormula"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+
+                style="@style/stdText"
+                android:gravity="start"
+                android:text="@string/JuliaFormula" />
+
+            <Spinner
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/spinnerFormulaJulia"
+                android:layout_toRightOf="@id/txtViewJuliaFormula"
+                android:layout_toEndOf="@id/txtViewJuliaFormula"
+
+                android:gravity="end"
+                style="@style/stdText"
+                android:entries="@array/JuliaFormulas"
+                android:spinnerMode="dialog" />
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/btnDrawJulia"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/rowJulia2"
+
+            android:text="@string/drawJulia"
+            style="@style/stdText"
+
+            android:onClick="computeJulia"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/IFSLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/JuliaLayout"
         android:layout_marginTop="@dimen/std_margin"
         android:layout_marginBottom="@dimen/std_margin"
         android:background="@color/std_background"

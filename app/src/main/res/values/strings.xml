@@ -27,6 +27,19 @@
         <item>exp(z) + c</item>
     </string-array>
 
+    <string name="drawJulia">Множество Жюлиа</string>
+    <string name="JuliaIterations">Iterations: </string>
+    <string name="stdJuliaNum">50</string>
+    <string name="JuliaFormula">Formula: </string>
+    <string-array name="JuliaFormulas">
+        <item>z + c</item>
+        <item>z^2 + c</item>
+        <item>z^4 + c</item>
+        <item>z^8 + c</item>
+        <item>z^16 + c</item>
+        <item>sin(z) + c</item>
+        <item>exp(z) + c</item>
+    </string-array>
 
     <string name="drawIFS">Нарисовать фрактал</string>
     <string name="IFSIterations">Iterations: </string>

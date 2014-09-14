@@ -22,6 +22,7 @@ public class MainActivity extends Activity {
 
     private static final int MAX_ITER_KOCH = 9;
     private static final int MAX_ITER_MANDEL = 500;
+    private static final int MAX_ITER_JULIA = 500;
     private static final int MAX_ITER_IFS = 1000000;
 
     public static ArrayList<Segment> segments;
@@ -48,10 +49,12 @@ public class MainActivity extends Activity {
     private void interfaceControl(boolean state){
         Button btnKoch = (Button) findViewById(R.id.btnDrawKoch);
         Button btnMandel = (Button) findViewById(R.id.btnDrawMandel);
+        Button btnJulia = (Button) findViewById(R.id.btnDrawJulia);
         Button btnIFS = (Button) findViewById(R.id.btnDrawIFS);
 
         btnKoch.setEnabled(state);
         btnMandel.setEnabled(state);
+        btnJulia.setEnabled(state);
         btnIFS.setEnabled(state);
     }
 
@@ -102,13 +105,42 @@ public class MainActivity extends Activity {
             return;
         }
 
-        Spinner spinner = (Spinner) findViewById(R.id.spinnerFormula);
+        Spinner spinner = (Spinner) findViewById(R.id.spinnerFormulaMandel);
         long formulaNum = spinner.getSelectedItemId();
 
         interfaceControl(false);
 
         MandelbrotComputer Mandel = new MandelbrotComputer((int)formulaNum + 1);
         Mandel.execute(iterMandel);
+    }
+
+    public void computeJulia(View v){
+        EditText edtJuliaIterations = (EditText) findViewById(R.id.edtTextMandelNum);
+        int iterJulia;
+
+        try{
+            iterJulia = Integer.parseInt(edtJuliaIterations.getText().toString());
+        } catch (Exception e){
+            Log.d(LogTags.APP, e.getMessage());
+            String msg = "Must be integer value > 0 and < " + MAX_ITER_JULIA;
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (iterJulia > MAX_ITER_MANDEL || iterJulia< 1){
+            String msg = "Must be integer value > 0 and < " + MAX_ITER_JULIA;
+            Log.d(LogTags.APP, msg);
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Spinner spinner = (Spinner) findViewById(R.id.spinnerFormulaJulia);
+        long formulaNum = spinner.getSelectedItemId();
+
+        interfaceControl(false);
+
+        JuliaComputer Julia = new JuliaComputer((int)formulaNum + 1);
+        Julia.execute(iterJulia);
     }
 
     public void computeIFS(View v){
@@ -187,8 +219,6 @@ public class MainActivity extends Activity {
         protected void onPreExecute() {
             super.onPreExecute();
             startTime = System.currentTimeMillis();
-            String msg = "Started computing Koch snowflake";
-            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -256,8 +286,6 @@ public class MainActivity extends Activity {
         @Override
         protected void onPreExecute() {
             startTime = System.currentTimeMillis();
-            String msg = "Started computing Mandelbrot set";
-            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -351,6 +379,117 @@ public class MainActivity extends Activity {
 
     }
 
+    private class JuliaComputer extends AsyncTask<Integer, Void, Void>{
+
+        private int power;
+        private long startTime;
+
+        public JuliaComputer(int formulaNum){
+            power = formulaNum;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            startTime = System.currentTimeMillis();
+        }
+
+        @Override
+        protected Void doInBackground(Integer... integers) {
+            final int width = Constants.WIDTH;
+            final int height = Constants.HEIGHT;
+
+            int iterJulia = integers[0];
+
+            colors = new int[width * height];
+
+            double Ax, Bx, Ay, By;
+            Ax = 2.5 / width; Bx = -1.5;
+            Ay = 2.2 / height; By = -1.1;
+
+            Complex z = new Complex();
+            Complex tmp = new Complex();
+            for (int x0 = 0; x0 < width; x0++)
+            {
+                z.setRe(Ax * x0 + Bx);
+                for (int y0 = 0; y0 < height; y0++)
+                {
+                    z.setIm(Ay * y0 + By);
+                    tmp.setRe(0);
+                    tmp.setIm(0);
+                    int iter = computeDepth(z, tmp, iterJulia);
+                    int r = iter*iter % 256;
+                    int g = (iter  + iter) % 256;
+                    int b = (iter + iter * iter) % 256;
+                    int color = Color.rgb(r, g, b);
+                    colors[x0 * height + y0] = color;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            long finishTime = System.currentTimeMillis();
+            String msg = "Computing finished in " + (finishTime - startTime) + "ms";
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+
+            Intent i = new Intent(getApplicationContext(), PictureActivity.class);
+            i.putExtra("type", "Julia");
+            startActivity(i);
+        }
+
+        private int computeDepth(Complex z, Complex tmp, int maxIterations)
+        {
+            int res = 0;
+            tmp.setRe(z.re());
+            tmp.setIm(z.im());
+            Complex c = new Complex(-0.8, 0.2);
+            while ((tmp.lightAbs() < 4) && (res < maxIterations))
+            {
+                switch(power){
+                    case 1:
+                        tmp.lightPlus(c);
+                        break;
+                    case 2:
+                        tmp.lightTimes(tmp);
+                        tmp.lightPlus(c);
+                        break;
+                    case 3:
+                        tmp.lightTimes(tmp);
+                        tmp.lightTimes(tmp);
+                        tmp.lightPlus(c);
+                        break;
+                    case 4:
+                        tmp.lightTimes(tmp);
+                        tmp.lightTimes(tmp);
+                        tmp.lightTimes(tmp);
+                        tmp.lightPlus(c);
+                        break;
+                    case 5:
+                        tmp.lightTimes(tmp);
+                        tmp.lightTimes(tmp);
+                        tmp.lightTimes(tmp);
+                        tmp.lightTimes(tmp);
+                        tmp.lightPlus(c);
+                        break;
+                    case 6:
+                        tmp.lightSin();
+                        tmp.lightPlus(c);
+                        break;
+                    case 7:
+                        tmp.lightExp();
+                        tmp.lightPlus(c);
+                        break;
+                }
+                res++;
+            }
+            return res;
+        }
+
+
+    }
+
     public class IFSComputer extends AsyncTask<Integer, Void, Void>{
 
         public static final int ROW_SIZE = 7;
@@ -368,8 +507,6 @@ public class MainActivity extends Activity {
         protected void onPreExecute() {
             super.onPreExecute();
             startTime = System.currentTimeMillis();
-            String msg = "Started computing IFS";
-            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
         }
 
         @Override
