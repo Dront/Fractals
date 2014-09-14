@@ -150,7 +150,7 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/TriangleLayout"
+        android:id="@+id/IFSLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/MandelbrotLayout"
@@ -161,12 +161,12 @@
         android:paddingRight="@dimen/std_padding">
 
         <RelativeLayout
-            android:id="@+id/rowTriangle"
+            android:id="@+id/rowIFS1"
             android:layout_width="fill_parent"
             android:layout_height="@dimen/std_row_height">
 
             <TextView
-                android:id="@+id/txtViewTriangle"
+                android:id="@+id/txtViewIFS"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:layout_alignParentLeft="true"
@@ -174,33 +174,63 @@
 
                 style="@style/stdText"
                 android:gravity="start"
-                android:text="@string/TriangleIterations" />
+                android:text="@string/IFSIterations" />
 
             <EditText
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:id="@+id/edtTextTriangleNum"
-                android:layout_toRightOf="@id/txtViewTriangle"
-                android:layout_toEndOf="@id/txtViewTriangle"
+                android:id="@+id/edtTextIFSNum"
+                android:layout_toRightOf="@id/txtViewIFS"
+                android:layout_toEndOf="@id/txtViewIFS"
 
                 android:gravity="end"
                 android:inputType="numberDecimal"
                 style="@style/stdText"
-                android:text="@string/stdTriangleNum"/>
+                android:text="@string/stdIFSNum"/>
 
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rowIFS2"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/std_row_height"
+            android:layout_below="@id/rowIFS1">
+
+            <TextView
+                android:id="@+id/txtViewIFSFormula"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+
+                style="@style/stdText"
+                android:gravity="start"
+                android:text="@string/IFSFractal" />
+
+            <Spinner
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/spinnerIFS"
+                android:layout_toRightOf="@id/txtViewIFSFormula"
+                android:layout_toEndOf="@id/txtViewIFSFormula"
+
+                android:gravity="end"
+                style="@style/stdText"
+                android:entries="@array/IFSFractals"
+                android:spinnerMode="dialog" />
 
         </RelativeLayout>
 
         <Button
-            android:id="@+id/btnDrawTriangle"
+            android:id="@+id/btnDrawIFS"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/rowTriangle"
+            android:layout_below="@id/rowIFS2"
 
-            android:text="@string/drawTriangle"
+            android:text="@string/drawIFS"
             style="@style/stdText"
 
-            android:onClick="computeSierpinski"/>
+            android:onClick="computeIFS"/>
 
     </RelativeLayout>
 

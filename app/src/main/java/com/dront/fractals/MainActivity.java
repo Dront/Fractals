@@ -6,12 +6,10 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.DecimalFormat;
@@ -24,7 +22,7 @@ public class MainActivity extends Activity {
 
     private static final int MAX_ITER_KOCH = 9;
     private static final int MAX_ITER_MANDEL = 500;
-    private static final int MAX_ITER_TRIANGLE = 1000000;
+    private static final int MAX_ITER_IFS = 1000000;
 
     public static ArrayList<Segment> segments;
     public static int[] colors;
@@ -34,8 +32,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        customizeSpinner();
     }
 
     @Override
@@ -49,34 +45,31 @@ public class MainActivity extends Activity {
         interfaceControl(true);
     }
 
-    private void customizeSpinner(){
-        Spinner spinner = (Spinner) findViewById(R.id.spinnerFormula);
-        int size = spinner.getChildCount();
-
-        TextView tmp;
-        for (int i = 0; i < size; i++){
-            tmp = (TextView)spinner.getChildAt(i);
-            tmp.setTextSize(25);
-            tmp.setGravity(Gravity.END);
-        }
-    }
-
     private void interfaceControl(boolean state){
         Button btnKoch = (Button) findViewById(R.id.btnDrawKoch);
         Button btnMandel = (Button) findViewById(R.id.btnDrawMandel);
-        Button btnTriangle = (Button) findViewById(R.id.btnDrawTriangle);
+        Button btnIFS = (Button) findViewById(R.id.btnDrawIFS);
 
         btnKoch.setEnabled(state);
         btnMandel.setEnabled(state);
-        btnTriangle.setEnabled(state);
+        btnIFS.setEnabled(state);
     }
 
     public void computeKoch(View v){
         EditText edtKochIterations = (EditText) findViewById(R.id.edtTextKochNum);
-        int iterKoch = Integer.parseInt(edtKochIterations.getText().toString());
+        int iterKoch;
+
+        try{
+            iterKoch = Integer.parseInt(edtKochIterations.getText().toString());
+        } catch(Exception e){
+            Log.d(LogTags.APP, e.getMessage());
+            String msg = "Must be integer value > 0 and < " + MAX_ITER_KOCH;
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         if (iterKoch > MAX_ITER_KOCH){
-            String msg = "Max number of iterations = " + MAX_ITER_KOCH;
+            String msg = "Must be integer value > 0 and < " + MAX_ITER_KOCH;
             Log.d(LogTags.APP, msg);
             Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
             return;
@@ -91,10 +84,19 @@ public class MainActivity extends Activity {
 
     public void computeMandel(View v){
         EditText edtMandelIterations = (EditText) findViewById(R.id.edtTextMandelNum);
-        int iterMandel = Integer.parseInt(edtMandelIterations.getText().toString());
+        int iterMandel;
 
-        if (iterMandel > MAX_ITER_MANDEL){
-            String msg = "Max number of iterations = " + MAX_ITER_MANDEL;
+        try{
+            iterMandel = Integer.parseInt(edtMandelIterations.getText().toString());
+        } catch (Exception e){
+            Log.d(LogTags.APP, e.getMessage());
+            String msg = "Must be integer value > 0 and < " + MAX_ITER_MANDEL;
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (iterMandel > MAX_ITER_MANDEL || iterMandel< 1){
+            String msg = "Must be integer value > 0 and < " + MAX_ITER_MANDEL;
             Log.d(LogTags.APP, msg);
             Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
             return;
@@ -102,7 +104,6 @@ public class MainActivity extends Activity {
 
         Spinner spinner = (Spinner) findViewById(R.id.spinnerFormula);
         long formulaNum = spinner.getSelectedItemId();
-        Log.d("spinner", "formula num: " + formulaNum);
 
         interfaceControl(false);
 
@@ -110,43 +111,72 @@ public class MainActivity extends Activity {
         Mandel.execute(iterMandel);
     }
 
-    public void computeSierpinski(View v){
-        EditText edtTriangleIterations = (EditText) findViewById(R.id.edtTextTriangleNum);
-        int iterTriangle = Integer.parseInt(edtTriangleIterations.getText().toString());
+    public void computeIFS(View v){
+        EditText edtIFSIterations = (EditText) findViewById(R.id.edtTextIFSNum);
 
-        if (iterTriangle > MAX_ITER_TRIANGLE){
-            String msg = "Max number of iterations = " + MAX_ITER_TRIANGLE;
-            Log.d(LogTags.APP, msg);
+        int iterIFS;
+        try{
+            iterIFS = Integer.parseInt(edtIFSIterations.getText().toString());
+        } catch (Exception e){
+            Log.d(LogTags.APP, e.getMessage());
+            String msg = "Must be integer value > 0 and < " + MAX_ITER_IFS;
             Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
             return;
         }
 
+        if (iterIFS > MAX_ITER_IFS || iterIFS < 1){
+            String msg = "Must be integer value > 0 and < " + MAX_ITER_IFS;
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Spinner spinner = (Spinner) findViewById(R.id.spinnerIFS);
+        long fractalNum = spinner.getSelectedItemId() + 1;
+        Log.d("spinner", "fractal num: " + fractalNum);
+
         interfaceControl(false);
 
-//        final int N = 3;
-//        final double[][] attractors = new double[][]{
-//            {0.5, 0.0, 0.0, 0.5, 0.0, 0.0, 1.0 / 3},
-//            {0.5, 0.0, 0.0, 0.5, 0.5, 0.0, 1.0 / 3},
-//            {0.5, 0.0, 0.0, 0.5, 0.25, Math.sqrt(3.0) / 2 / 2, 1.0 / 3}
-//        };
+        int N;
+        double[][] attractors;
 
-//        final int N = 2;
-//        final double[][] attractors = new double[][]{
-//                {0.5, 0.5, -0.5,  0.5,  0.0, 0.5, 0.5},
-//                {0.5, 0.5,  0.5, -0.5,  0.5, 1.0, 0.5}
-//        };
-
-        final int N = 2;
-        final double[][] attractors = new double[][]{
-                {-0.61, 0.7, -0.7, -0.61, 0.00, 0.0, 0.9},
-                {0.21, 0.0,  0.0,  0.21, 0.79, 0.0, 0.1}
-        };
+        switch ((int)fractalNum){
+            case 1:
+                N = FractalData.SierpinskiTriangleN;
+                attractors = FractalData.SierpinskiTriangle;
+                break;
+            case 2:
+                N = FractalData.SierpinskiSquareN;
+                attractors = FractalData.SierpinskiSquare;
+                break;
+            case 3:
+                N = FractalData.DragonN;
+                attractors = FractalData.Dragon;
+                break;
+            case 4:
+                N = FractalData.SpiralN;
+                attractors = FractalData.Spiral;
+                break;
+            case 5:
+                N = FractalData.FirN;
+                attractors = FractalData.Fir;
+                break;
+            case 6:
+                N = FractalData.MapleN;
+                attractors = FractalData.Maple;
+                break;
+            case 7:
+                N = FractalData.StairwayN;
+                attractors = FractalData.Stairway;
+                break;
+            default:
+                String msg = "Wrong element chosen from IFSSpinner";
+                Log.d(LogTags.APP, msg);
+                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                return;
+        }
 
         IFSComputer IFS = new IFSComputer(attractors, N);
-        IFS.execute(iterTriangle);
-
-        //SierpinskiComputer Sierpinski = new SierpinskiComputer(3);
-        //Sierpinski.execute(iterTriangle);
+        IFS.execute(iterIFS);
     }
 
     private class KochComputer extends AsyncTask<Integer, Void, Void>{
@@ -321,90 +351,6 @@ public class MainActivity extends Activity {
 
     }
 
-    public class SierpinskiComputer extends AsyncTask<Integer, Void, Void>{
-
-        private final Point vertex31 = new Point(0, 0);
-        private final Point vertex32 = new Point(1, 0);
-        private final Point vertex33 = new Point(0.5, Math.sqrt(3.0) / 2);
-        private final Point vertex41 = new Point(0, 0);
-        private final Point vertex42 = new Point(1, 0);
-        private final Point vertex43 = new Point(1, 1);
-        private final Point vertex44 = new Point(0, 1);
-
-        private int numberOfVertexes;
-        private long startTime;
-
-        public SierpinskiComputer(int number){
-            numberOfVertexes = number;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            startTime = System.currentTimeMillis();
-            String msg = "Started computing Sierpinski triangle";
-            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        protected Void doInBackground(Integer... integers) {
-            final int iterTriangle = integers[0];
-            Point point = new Point(0.5, 0.5);
-
-            points = new Point[iterTriangle];
-            for (int i = 0; i < iterTriangle; i++){
-                switch (numberOfVertexes) {
-                    case 3:
-                        point = triangle(point);
-                        break;
-                    case 4:
-                        point = carpet(point);
-                        break;
-                    default:
-                        Log.d(LogTags.APP, "Wrong number of vertexes");
-                }
-                points[i] = point;
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            long finishTime = System.currentTimeMillis();
-            String msg = "Computing finished in " + (finishTime - startTime) + "ms";
-            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-
-            Intent i = new Intent(getApplicationContext(), PictureActivity.class);
-            i.putExtra("type", "Triangle");
-            startActivity(i);
-        }
-
-        private Point triangle(Point point){
-            double rand = Math.random();
-            if (rand < 1.0 / 3){
-                return new Point((point.x + vertex31.x) / 2, (point.y + vertex31.y) / 2);
-            } else if (rand > 1.0 / 3 && rand > 2.0 / 3){
-                return new Point((point.x + vertex32.x) / 2, (point.y + vertex32.y) / 2);
-            } else {
-                return new Point((point.x + vertex33.x) / 2, (point.y + vertex33.y) / 2);
-            }
-        }
-
-        private Point carpet(Point point) {
-            double rand = Math.random();
-            if (rand < 1.0 / 4) {
-                return new Point((point.x + vertex41.x) / 2, (point.y + vertex41.y) / 2);
-            } else if (rand > 1.0 / 4 && rand < 2.0 / 4) {
-                return new Point((point.x + vertex42.x) / 2, (point.y + vertex42.y) / 2);
-            } else if (rand > 2.0 / 4 && rand < 3.0 / 4) {
-                return new Point((point.x + vertex43.x) / 2, (point.y + vertex43.y) / 2);
-            } else {
-                return new Point((point.x + vertex44.x) / 2, (point.y + vertex44.y) / 2);
-            }
-        }
-    }
-
     public class IFSComputer extends AsyncTask<Integer, Void, Void>{
 
         public static final int ROW_SIZE = 7;
@@ -431,6 +377,9 @@ public class MainActivity extends Activity {
             final int IFSIterations = integers[0];
             Point point = new Point(0.5, 0.5);
 
+            Point minValues = new Point(Double.MAX_VALUE, Double.MAX_VALUE);
+            Point maxValues = new Point(-Double.MAX_VALUE, -Double.MAX_VALUE);
+
             points = new Point[IFSIterations];
             for (int i = 0; i < IFSIterations; i++) {
                 int num = getFunctionNumber();
@@ -443,7 +392,25 @@ public class MainActivity extends Activity {
                 double newX = a * point.x + b * point.y + e;
                 double newY = c * point.x + d * point.y + f;
                 point = new Point(newX, newY);
+                if (point.x > maxValues.x){
+                    maxValues.x = point.x;
+                }
+                if (point.y > maxValues.y){
+                    maxValues.y = point.y;
+                }
+                if (point.x < minValues.x){
+                    minValues.x = point.x;
+                }
+                if (point.y < minValues.y){
+                    minValues.y = point.y;
+                }
                 points[i] = point;
+            }
+
+            Point scale = new Point(maxValues.x - minValues.x, maxValues.y - minValues.y);
+            for (Point tmp: points){
+                tmp.minus(minValues);
+                tmp.divide(scale);
             }
 
             return null;

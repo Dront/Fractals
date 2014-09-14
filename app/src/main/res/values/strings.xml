@@ -28,7 +28,18 @@
     </string-array>
 
 
-    <string name="drawTriangle">Треугольник Серпинского</string>
-    <string name="TriangleIterations">Iterations: </string>
-    <string name="stdTriangleNum">50000</string>
+    <string name="drawIFS">Нарисовать фрактал</string>
+    <string name="IFSIterations">Iterations: </string>
+    <string name="stdIFSNum">200000</string>
+    <string name = "IFSFractal">Фрактал: </string>
+    <string-array name="IFSFractals">
+        <item>Треугольник Серпинского</item>
+        <item>Ковер Серпинского</item>
+        <item>Дракон</item>
+        <item>Спираль</item>
+        <item>Ель</item>
+        <item>Кленовый лист</item>
+        <item>Лестница</item>
+    </string-array>
+
 </resources>
