@@ -2,23 +2,21 @@ package com.dront.fractals;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
 import android.widget.ImageView;
-
-import java.util.ArrayList;
 
 
 public class PictureActivity extends Activity {
 
-    private static final int SIZE = 1000;
+    private static final int UI_UPDATE_DELAY = 500;
 
-    ImageView imgViewMain;
-    Bitmap pic;
+    private int count = 1;
+    private int picNum = 0;
+
+    private ImageView imgViewMain;
+    private Handler h;
+    private Runnable pictureUpdate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,95 +26,33 @@ public class PictureActivity extends Activity {
         getInterfaceResources();
 
         Intent i = getIntent();
-        final String type = i.getStringExtra("type");
+        count = i.getIntExtra("count", 1);
 
-
-        new Thread(new Runnable() {
+        h = new Handler();
+        pictureUpdate = new Runnable() {
             @Override
             public void run() {
-                if (type.equals("Koch")){
-                    drawKoch(MainActivity.segments);
-                } else if (type.equals("Mandel")){
-                    drawMandel(MainActivity.colors);
-                } else if (type.equals("Julia")){
-                    drawMandel(MainActivity.colors);
-                } else if (type.equals("IFS")) {
-                    drawTriangle(MainActivity.points);
-                }
+                imgViewMain.setImageBitmap(MainActivity.pic[picNum++ % count]);
+                h.postDelayed(this, UI_UPDATE_DELAY);
             }
-        }).start();
+        };
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        if (pic != null){
-            pic.recycle();
-        }
-    }
 
     private void getInterfaceResources(){
         imgViewMain = (ImageView) findViewById(R.id.imgViewMain);
     }
 
-    private void drawKoch(ArrayList<Segment> data){
 
-        pic = Bitmap.createBitmap(SIZE, SIZE, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(pic);
-
-        Paint paint = new Paint();
-        paint.setColor(Color.BLUE);
-        paint.setAntiAlias(true);
-        paint.setStrokeWidth(3.0f);
-        paint.setStyle(Paint.Style.STROKE);
-
-        for (Segment seg: data){
-            canvas.drawLine(SIZE * (float)seg.getX1(), SIZE * (float)seg.getY1(),
-                    SIZE * (float)seg.getX2(), SIZE * (float)seg.getY2(), paint);
-        }
-        imgViewMain.post(new Runnable() {
-            @Override
-            public void run() {
-                imgViewMain.setImageBitmap(pic);
-            }
-        });
+    @Override
+    protected void onResume() {
+        super.onResume();
+        h.postDelayed(pictureUpdate, UI_UPDATE_DELAY);
     }
 
-    private void drawMandel(int[] data){
-        pic = Bitmap.createBitmap(Constants.WIDTH, Constants.HEIGHT, Bitmap.Config.ARGB_8888);
-        for (int x = 0; x < Constants.WIDTH; x++){
-            for (int y = 0; y < Constants.HEIGHT; y++){
-                pic.setPixel(x, y, data[x * Constants.HEIGHT + y]);
-            }
-        }
-        imgViewMain.post(new Runnable() {
-            @Override
-            public void run() {
-                imgViewMain.setImageBitmap(pic);
-            }
-        });
-    }
-
-    private void drawTriangle(Point[] data){
-        pic = Bitmap.createBitmap(SIZE, SIZE, Bitmap.Config.ARGB_8888);
-
-        for (Point tmp: data){
-            if (tmp.x >= 1 || tmp.y >= 1 || tmp.x < 0 || tmp.y < 0){
-                Log.d(LogTags.APP, "point with wrong coords in MainActivity.points");
-                continue;
-            }
-
-            int x = (int)(tmp.x * SIZE);
-            int y = (int)(tmp.y * SIZE);
-            pic.setPixel(x, y, Color.RED);
-        }
-
-        imgViewMain.post(new Runnable() {
-            @Override
-            public void run() {
-                imgViewMain.setImageBitmap(pic);
-            }
-        });
+    @Override
+    protected void onPause() {
+        h.removeCallbacks(pictureUpdate);
+        super.onPause();
     }
 }

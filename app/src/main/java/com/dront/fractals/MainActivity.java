@@ -2,7 +2,10 @@ package com.dront.fractals;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,7 +15,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import Util.Complex;
@@ -22,12 +24,14 @@ public class MainActivity extends Activity {
 
     private static final int MAX_ITER_KOCH = 9;
     private static final int MAX_ITER_MANDEL = 500;
-    private static final int MAX_ITER_JULIA = 500;
-    private static final int MAX_ITER_IFS = 1000000;
 
-    public static ArrayList<Segment> segments;
-    public static int[] colors;
-    public static Point[] points;
+    private static final int MAX_ITER_JULIA = 500;
+    private static final int MAX_SLIDES_JULIA = 8;
+
+    private static final int MAX_ITER_IFS = 1000000;
+    private static final int MAX_SLIDES_IFS = 10;
+
+    public static Bitmap[] pic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +43,12 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        segments = null;
-        colors = null;
-        points = null;
+        if (pic != null){
+            for (Bitmap tmp: pic){
+               tmp.recycle();
+            }
+
+        }
 
         interfaceControl(true);
     }
@@ -80,6 +87,7 @@ public class MainActivity extends Activity {
 
         interfaceControl(false);
 
+        pic = new Bitmap[1];
         KochComputer Koch = new KochComputer();
         Koch.execute(iterKoch);
 
@@ -110,6 +118,7 @@ public class MainActivity extends Activity {
 
         interfaceControl(false);
 
+        pic = new Bitmap[1];
         MandelbrotComputer Mandel = new MandelbrotComputer((int)formulaNum + 1);
         Mandel.execute(iterMandel);
     }
@@ -139,8 +148,11 @@ public class MainActivity extends Activity {
 
         interfaceControl(false);
 
-        JuliaComputer Julia = new JuliaComputer((int)formulaNum + 1);
-        Julia.execute(iterJulia);
+        pic = new Bitmap[MAX_SLIDES_JULIA];
+        for (int i = 0; i < MAX_SLIDES_JULIA; i++){
+            JuliaComputer Julia = new JuliaComputer((int)formulaNum + 1, i);
+            Julia.execute(iterJulia);
+        }
     }
 
     public void computeIFS(View v){
@@ -200,6 +212,10 @@ public class MainActivity extends Activity {
                 N = FractalData.StairwayN;
                 attractors = FractalData.Stairway;
                 break;
+            case 8:
+                N = FractalData.Fern2N;
+                attractors = FractalData.Fern2;
+                break;
             default:
                 String msg = "Wrong element chosen from IFSSpinner";
                 Log.d(LogTags.APP, msg);
@@ -207,11 +223,17 @@ public class MainActivity extends Activity {
                 return;
         }
 
-        IFSComputer IFS = new IFSComputer(attractors, N);
-        IFS.execute(iterIFS);
+        pic = new Bitmap[MAX_SLIDES_IFS];
+        for (int i = 0; i < MAX_SLIDES_IFS; i++){
+            IFSComputer IFS = new IFSComputer(attractors, N, i);
+            IFS.execute(iterIFS);
+        }
+
     }
 
     private class KochComputer extends AsyncTask<Integer, Void, Void>{
+
+        private static final int SIZE = 500;
 
         long startTime;
 
@@ -225,7 +247,7 @@ public class MainActivity extends Activity {
         protected Void doInBackground(Integer... integers) {
             int iterKoch = integers[0];
 
-            segments = new ArrayList<Segment>();
+            ArrayList<Segment> segments = new ArrayList<Segment>();
             final double sqrt36 = Math.sqrt(3.0) / 6;
 
             Point startPoint1 = new Point(0, sqrt36);
@@ -258,6 +280,23 @@ public class MainActivity extends Activity {
                 segments.clear();
                 segments.addAll(newSegments);
             }
+
+            pic[0] = Bitmap.createBitmap(SIZE, SIZE, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(pic[0]);
+
+            Paint paint = new Paint();
+            paint.setColor(Color.BLUE);
+            paint.setAntiAlias(true);
+            paint.setStrokeWidth(3.0f);
+            paint.setStyle(Paint.Style.STROKE);
+
+            for (Segment seg: segments){
+                canvas.drawLine(SIZE * (float)seg.getX1(), SIZE * (float)seg.getY1(),
+                        SIZE * (float)seg.getX2(), SIZE * (float)seg.getY2(), paint);
+            }
+
+            segments.clear();
+
             return null;
         }
 
@@ -276,7 +315,7 @@ public class MainActivity extends Activity {
 
     private class MandelbrotComputer extends AsyncTask<Integer, Void, Void>{
 
-        private int power;
+        private final int power;
         private long startTime;
 
         public MandelbrotComputer(int formulaNum){
@@ -295,7 +334,7 @@ public class MainActivity extends Activity {
 
             int iterMandel = integers[0];
 
-            colors = new int[width * height];
+            pic[0] = Bitmap.createBitmap(Constants.WIDTH, Constants.HEIGHT, Bitmap.Config.ARGB_8888);
 
             double Ax, Bx, Ay, By;
             Ax = 2.5 / width; Bx = -1.5;
@@ -312,10 +351,11 @@ public class MainActivity extends Activity {
                     tmp.setRe(0);
                     tmp.setIm(0);
                     long iter = computeDepth(z, tmp, iterMandel);
-                    int color = Color.rgb((int)(256 - iter*4 % 256), (int)(256 - iter * 6 % 256), (int)(256 - iter * 20 % 256));
-                    colors[x0 * height + y0] = color;
+                    int color = Color.rgb((int)(iter * 4 % 256), (int)(iter * 6 % 256), (int)(iter * 20 % 256));
+                    pic[0].setPixel(x0, y0, color);
                 }
             }
+
             return null;
         }
 
@@ -331,8 +371,7 @@ public class MainActivity extends Activity {
             startActivity(i);
         }
 
-        private int computeDepth(Complex z, Complex tmp, int maxIterations)
-        {
+        private int computeDepth(Complex z, Complex tmp, int maxIterations){
             int res = 0;
             while ((tmp.lightAbs() < 4) && (res < maxIterations))
             {
@@ -341,25 +380,25 @@ public class MainActivity extends Activity {
                         tmp.lightPlus(z);
                         break;
                     case 2:
-                        tmp.lightTimes(tmp);
+                        tmp.selfTimes();
                         tmp.lightPlus(z);
                         break;
                     case 3:
-                        tmp.lightTimes(tmp);
-                        tmp.lightTimes(tmp);
+                        tmp.selfTimes();
+                        tmp.selfTimes();
                         tmp.lightPlus(z);
                         break;
                     case 4:
-                        tmp.lightTimes(tmp);
-                        tmp.lightTimes(tmp);
-                        tmp.lightTimes(tmp);
+                        tmp.selfTimes();
+                        tmp.selfTimes();
+                        tmp.selfTimes();
                         tmp.lightPlus(z);
                         break;
                     case 5:
-                        tmp.lightTimes(tmp);
-                        tmp.lightTimes(tmp);
-                        tmp.lightTimes(tmp);
-                        tmp.lightTimes(tmp);
+                        tmp.selfTimes();
+                        tmp.selfTimes();
+                        tmp.selfTimes();
+                        tmp.selfTimes();
                         tmp.lightPlus(z);
                         break;
                     case 6:
@@ -376,16 +415,17 @@ public class MainActivity extends Activity {
             return res;
         }
 
-
     }
 
     private class JuliaComputer extends AsyncTask<Integer, Void, Void>{
 
         private int power;
+        private int picNum;
         private long startTime;
 
-        public JuliaComputer(int formulaNum){
+        public JuliaComputer(int formulaNum, int picNum){
             power = formulaNum;
+            this.picNum = picNum;
         }
 
         @Override
@@ -400,7 +440,7 @@ public class MainActivity extends Activity {
 
             int iterJulia = integers[0];
 
-            colors = new int[width * height];
+            pic[picNum] = Bitmap.createBitmap(Constants.WIDTH, Constants.HEIGHT, Bitmap.Config.ARGB_8888);
 
             double Ax, Bx, Ay, By;
             Ax = 2.5 / width; Bx = -1.5;
@@ -417,13 +457,13 @@ public class MainActivity extends Activity {
                     tmp.setRe(0);
                     tmp.setIm(0);
                     int iter = computeDepth(z, tmp, iterJulia);
-                    int r = iter*iter % 256;
-                    int g = (iter  + iter) % 256;
+                    int r = iter * iter % 256;
+                    int g = (iter + iter) % 256;
                     int b = (iter + iter * iter) % 256;
-                    int color = Color.rgb(r, g, b);
-                    colors[x0 * height + y0] = color;
+                    pic[picNum].setPixel(x0, y0, Color.rgb(r, g, b));
                 }
             }
+
             return null;
         }
 
@@ -434,17 +474,18 @@ public class MainActivity extends Activity {
             String msg = "Computing finished in " + (finishTime - startTime) + "ms";
             Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 
-            Intent i = new Intent(getApplicationContext(), PictureActivity.class);
-            i.putExtra("type", "Julia");
-            startActivity(i);
+            if (picNum == MAX_SLIDES_JULIA - 1){
+                Intent i = new Intent(getApplicationContext(), PictureActivity.class);
+                i.putExtra("count", MAX_SLIDES_JULIA);
+                startActivity(i);
+            }
         }
 
-        private int computeDepth(Complex z, Complex tmp, int maxIterations)
-        {
+        private int computeDepth(Complex z, Complex tmp, int maxIterations){
             int res = 0;
             tmp.setRe(z.re());
             tmp.setIm(z.im());
-            Complex c = new Complex(-0.8, 0.2);
+            Complex c = new Complex(-0.8 + (double)picNum / 60.0, 0.2 + (double)picNum / 60.0);
             while ((tmp.lightAbs() < 4) && (res < maxIterations))
             {
                 switch(power){
@@ -452,25 +493,25 @@ public class MainActivity extends Activity {
                         tmp.lightPlus(c);
                         break;
                     case 2:
-                        tmp.lightTimes(tmp);
+                        tmp.selfTimes();
                         tmp.lightPlus(c);
                         break;
                     case 3:
-                        tmp.lightTimes(tmp);
-                        tmp.lightTimes(tmp);
+                        tmp.selfTimes();
+                        tmp.selfTimes();
                         tmp.lightPlus(c);
                         break;
                     case 4:
-                        tmp.lightTimes(tmp);
-                        tmp.lightTimes(tmp);
-                        tmp.lightTimes(tmp);
+                        tmp.selfTimes();
+                        tmp.selfTimes();
+                        tmp.selfTimes();
                         tmp.lightPlus(c);
                         break;
                     case 5:
-                        tmp.lightTimes(tmp);
-                        tmp.lightTimes(tmp);
-                        tmp.lightTimes(tmp);
-                        tmp.lightTimes(tmp);
+                        tmp.selfTimes();
+                        tmp.selfTimes();
+                        tmp.selfTimes();
+                        tmp.selfTimes();
                         tmp.lightPlus(c);
                         break;
                     case 6:
@@ -492,15 +533,29 @@ public class MainActivity extends Activity {
 
     public class IFSComputer extends AsyncTask<Integer, Void, Void>{
 
-        public static final int ROW_SIZE = 7;
+        private static final int ROW_SIZE = 7;
+        private static final int FIRST_ITERATIONS = 50;
+        private static final double SHIFT = 0.1;
+        private static final int SIZE = 1000;
 
         private long startTime;
-        final int N;
-        final double [][] IFSData;
+        private final int N;
+        private final double [][] IFSData;
+        private double[] prob;
+        private int picNum = 0;
 
-        public IFSComputer(double[][] attractors, int N){
+        public IFSComputer(double[][] attractors, int N, int picNum){
             this.N = N;
             IFSData = attractors;
+            this.picNum = picNum;
+
+            prob = new double[N + 1];
+
+            prob[0] = 0;
+            double sum = 0;
+            for (int i = 0; i < N; i++){
+                prob[i + 1] = sum += IFSData[i][ROW_SIZE - 1];
+            }
         }
 
         @Override
@@ -514,21 +569,17 @@ public class MainActivity extends Activity {
             final int IFSIterations = integers[0];
             Point point = new Point(0.5, 0.5);
 
+            for (int i = 0; i < FIRST_ITERATIONS; i++){
+                point = iterate(point);
+            }
+
             Point minValues = new Point(Double.MAX_VALUE, Double.MAX_VALUE);
             Point maxValues = new Point(-Double.MAX_VALUE, -Double.MAX_VALUE);
 
-            points = new Point[IFSIterations];
+            Point[] points = new Point[IFSIterations];
             for (int i = 0; i < IFSIterations; i++) {
-                int num = getFunctionNumber();
-                double a = IFSData[num][0];
-                double b = IFSData[num][1];
-                double c = IFSData[num][2];
-                double d = IFSData[num][3];
-                double e = IFSData[num][4];
-                double f = IFSData[num][5];
-                double newX = a * point.x + b * point.y + e;
-                double newY = c * point.x + d * point.y + f;
-                point = new Point(newX, newY);
+                point = iterate(point);
+
                 if (point.x > maxValues.x){
                     maxValues.x = point.x;
                 }
@@ -544,37 +595,45 @@ public class MainActivity extends Activity {
                 points[i] = point;
             }
 
+            pic[picNum] = Bitmap.createBitmap(SIZE, SIZE, Bitmap.Config.ARGB_8888);
+
+            minValues.x -= SHIFT / 2;
+            minValues.y -= SHIFT / 2;
+            maxValues.x += SHIFT / 2;
+            maxValues.y += SHIFT / 2;
             Point scale = new Point(maxValues.x - minValues.x, maxValues.y - minValues.y);
             for (Point tmp: points){
                 tmp.minus(minValues);
                 tmp.divide(scale);
+                pic[picNum].setPixel((int)(tmp.x * SIZE), (int)(tmp.y * SIZE), Color.RED);
             }
 
             return null;
         }
 
+        private Point iterate(final Point point){
+            int num = getFunctionNumber();
+            double a = IFSData[num][0];
+            double b = IFSData[num][1];
+            double c = IFSData[num][2];
+            double d = IFSData[num][3];
+            double e = IFSData[num][4] + (double)(picNum - MAX_SLIDES_IFS / 2) / 10.0;
+            double f = IFSData[num][5] - (double)(picNum - MAX_SLIDES_IFS / 2) / 10.0;
+            double newX = a * point.x + b * point.y + e;
+            double newY = c * point.x + d * point.y + f;
+
+            return new Point(newX, newY);
+        }
+
         private int getFunctionNumber(){
             double rand = Math.random();
-            double lowBorder = 0;
-            double highBorder = 0;
             for (int i = 0; i < N; i++){
-                lowBorder = countProbSum(i);
-                highBorder = countProbSum(i + 1);
-                if (rand > lowBorder && rand < highBorder){
+                if (rand >  prob[i]&& rand < prob[i + 1]){
                     return i;
                 }
             }
-            DecimalFormat df = new DecimalFormat("#.##");
-            Log.d(LogTags.APP, "Wrong func number: " + df.format(lowBorder) + " " + df.format(highBorder) + " " + df.format(rand));
+            Log.d(LogTags.APP, "Wrong func number");
             return (int) (rand * N);
-        }
-
-        private double countProbSum(int num){
-            double sum = 0;
-            for (int i = 0; i < num; i++){
-                sum += IFSData[i][ROW_SIZE - 1];
-            }
-            return sum;
         }
 
         @Override
@@ -584,9 +643,11 @@ public class MainActivity extends Activity {
             String msg = "Computing finished in " + (finishTime - startTime) + "ms";
             Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 
-            Intent i = new Intent(getApplicationContext(), PictureActivity.class);
-            i.putExtra("type", "IFS");
-            startActivity(i);
+            if (picNum == MAX_SLIDES_IFS - 1){
+                Intent i = new Intent(getApplicationContext(), PictureActivity.class);
+                i.putExtra("count", MAX_SLIDES_IFS);
+                startActivity(i);
+            }
         }
 
     }

@@ -65,11 +65,10 @@ public class Complex {
         return new Complex(real, imag);
     }
 
-    public void lightTimes(Complex b){
-        double real = this.re * b.re - this.im * b.im;
-        double imag = this.re * b.im + this.im * b.re;
-        this.re = real;
-        this.im = imag;
+    public void selfTimes(){
+        double real = re * re - im * im;
+        im = 2 * re * im;
+        re = real;
     }
 
     // scalar multiplication
